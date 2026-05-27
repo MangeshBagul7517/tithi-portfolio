@@ -1,3 +1,4 @@
+import emailjs from "@emailjs/browser";
 import { motion } from "framer-motion";
 import {
   Award,
@@ -10,6 +11,7 @@ import {
   GraduationCap,
   Layers,
   Linkedin,
+  Loader2,
   Mail,
   MapPin,
   Phone,
@@ -20,7 +22,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
