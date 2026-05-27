@@ -73,8 +73,9 @@ export function Hero() {
           className="mt-10 flex flex-wrap items-center gap-3"
         >
           <a
-            href="/resume.pdf"
-            download
+            href="https://drive.google.com/file/d/YOUR_RESUME_FILE_ID/view?usp=sharing"
+            target="_blank"
+            rel="noopener noreferrer"
             className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 px-5 py-3 text-sm font-medium text-white shadow-lg shadow-blue-500/30 transition hover:shadow-purple-500/50"
           >
             <Download className="h-4 w-4" />

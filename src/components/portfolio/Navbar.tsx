@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
-import { Menu, X, Moon, Sun } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 const links = [
   { href: "#about", label: "About" },
@@ -14,7 +14,6 @@ const links = [
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [dark, setDark] = useState(true);
 
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.2 });
@@ -26,9 +25,10 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* ensure light theme class is never applied */
   useEffect(() => {
-    document.documentElement.classList.toggle("light", !dark);
-  }, [dark]);
+    document.documentElement.classList.remove("light");
+  }, []);
 
   return (
     <>
@@ -69,13 +69,6 @@ export function Navbar() {
           </ul>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setDark((d) => !d)}
-              aria-label="Toggle theme"
-              className="grid h-9 w-9 place-content-center rounded-full border border-white/10 bg-white/5 text-muted-foreground transition hover:text-foreground"
-            >
-              {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
             <a
               href="#contact"
               className="hidden rounded-full bg-gradient-to-r from-blue-500 to-purple-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-500/30 transition hover:shadow-purple-500/50 md:inline-block"
