@@ -519,8 +519,42 @@ export function Education() {
 }
 
 /* ----------------------------- CONTACT ----------------------------- */
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || "";
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "";
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "";
+
 export function Contact() {
-  const [sent, setSent] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formRef.current) return;
+
+    if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
+      // eslint-disable-next-line no-console
+      console.warn("EmailJS not configured. Set VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID and VITE_EMAILJS_PUBLIC_KEY in your environment.");
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 4000);
+      return;
+    }
+
+    setStatus("sending");
+    try {
+      await emailjs.sendForm(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        formRef.current,
+        EMAILJS_PUBLIC_KEY
+      );
+      setStatus("sent");
+      formRef.current.reset();
+    } catch {
+      setStatus("error");
+    }
+    setTimeout(() => setStatus("idle"), 4000);
+  };
+
   return (
     <section id="contact" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
@@ -560,24 +594,22 @@ export function Contact() {
           </motion.div>
 
           <motion.form
+            ref={formRef}
             {...fadeUp}
-            onSubmit={(e) => {
-              e.preventDefault();
-              setSent(true);
-              setTimeout(() => setSent(false), 3000);
-            }}
+            onSubmit={handleSubmit}
             className="glass-strong space-y-4 rounded-2xl p-6 lg:col-span-3"
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Name" type="text" placeholder="Your name" />
-              <Field label="Email" type="email" placeholder="you@company.com" />
+              <Field name="from_name" label="Name" type="text" placeholder="Your name" />
+              <Field name="from_email" label="Email" type="email" placeholder="you@company.com" />
             </div>
-            <Field label="Subject" type="text" placeholder="Project, role, or opportunity" />
+            <Field name="subject" label="Subject" type="text" placeholder="Project, role, or opportunity" />
             <div>
               <label className="mb-1.5 block text-xs uppercase tracking-wider text-muted-foreground">
                 Message
               </label>
               <textarea
+                name="message"
                 required
                 rows={5}
                 placeholder="Tell me a bit about what you're working on…"
@@ -586,11 +618,22 @@ export function Contact() {
             </div>
             <button
               type="submit"
-              className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition hover:shadow-purple-500/50"
+              disabled={status === "sending"}
+              className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition hover:shadow-purple-500/50 disabled:opacity-60"
             >
               <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-              <Send className="h-4 w-4" />
-              {sent ? "Message sent!" : "Send Message"}
+              {status === "sending" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              {status === "sent"
+                ? "Message sent!"
+                : status === "error"
+                ? "Failed to send — try again"
+                : status === "sending"
+                ? "Sending..."
+                : "Send Message"}
             </button>
           </motion.form>
         </div>
@@ -607,10 +650,12 @@ export function Contact() {
 }
 
 function Field({
+  name,
   label,
   type,
   placeholder,
 }: {
+  name: string;
   label: string;
   type: string;
   placeholder: string;
@@ -621,6 +666,7 @@ function Field({
         {label}
       </label>
       <input
+        name={name}
         required
         type={type}
         placeholder={placeholder}
