@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CursorGlow, GridBackground, ParticleField } from "@/components/portfolio/Background";
@@ -14,10 +13,6 @@ import {
   Skills,
 } from "@/components/portfolio/Sections";
 import { Footer } from "@/components/portfolio/Footer";
-
-export const Route = createFileRoute("/")({
-  component: Index,
-});
 
 function Loader() {
   return (
@@ -44,7 +39,7 @@ function Loader() {
   );
 }
 
-function Index() {
+export default function App() {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 900);
